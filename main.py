@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi import Body, Header
-
+from fastapi import HTTPException
 
 app = FastAPI()
 
@@ -11,7 +11,7 @@ tasks = [
 ]
 
 
-@app.get("/task")
+@app.get("/tasks")
 def list_tasks(
     done: bool | None = None,
     q: str | None = None,
@@ -54,17 +54,49 @@ def list_tasks(
     return sonuc
 
 
-@app.get("/task/{task_id}")
+@app.get("/tasks/{task_id}")
 def get_task(task_id: int):
     for task in tasks:
         if task["id"] == task_id:
             return task
-    return {"error": "bulunamadi"}
+    raise HTTPException(status_code=404, detail="Task Yok")
     
-@app.post("/tasks")
+    
+    
+@app.post("/tasks", status_code=201)
 def create_task(
     title: str = Body(),
     done: bool = Body(default=False),
     x_client_name: str | None = Header(default=None),
 ):
-    tasks[]tasks.len()
+    yeni_id = max(task["id"] for task in tasks)+1
+
+    yeni_task = {"id":yeni_id, "title":title, "done":done}
+    tasks.append(yeni_task)
+    return yeni_task
+    
+
+
+@app.delete("/tasks/{task_id}", status_code=204)
+def delete_task(task_id:int):
+    Yanlis:bool = False
+    for task in tasks:
+        if task["id"] == task_id:
+            Yanlis = True
+            
+    if Yanlis == False:
+        raise HTTPException(status_code=404, detail="task yok")
+
+        
+    for task in tasks:
+        if task["id"] == task_id:
+            tasks.remove(task)
+            
+            
+            
+@app.patch("/tasks/{task_id}")
+def patch(task_id:int , done:bool):
+    for task in tasks:
+        if task["id"] == task_id:
+            task["done"] = done
+            return task
